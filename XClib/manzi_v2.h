@@ -13,6 +13,7 @@
 
 
 //根本用モータパラ
+#if 1
 #define ROOT_MAX_SPEED_DEG		-540.		//deg/s//1151
 #define ROOT_ACCEL_TIME		(((180 * 2) / ROOT_MAX_SPEED_DEG) * 1000.)	//ms
 #define ROOT_MAX_SPEED_RPS 	(ROOT_MAX_SPEED_DEG / 360.)	//rps
@@ -50,7 +51,12 @@
 #define TIP_GET_LAST_ANGLE_DEG		0.//deg
 #define TIP_GET_LAST_ANGLE		(TIP_GET_LAST_ANGLE_DEG / 360.)
 
+#elif 0
+#define ROOT_MAX_SPEED_DEG		-540.		//deg/s//
+#define ROOT_LAST_ANGLE_DEG		-180.//deg
 
+
+#endif
 double RELEASE_ANGLE_DEG;
 double RELEASE_ANGLE;
 
@@ -100,5 +106,5 @@ BUTTON Button;
 extern void MANZI_INIT();
 extern void MOTOR_CONTROLL();
 extern void INPUT();
-extern void PARM_SET(mParm *c,double Limit_S, double Last_A);
+extern void PARM_SET(mParm *c,double Limit_S, double Last_A, uint8_t Flg);
 #endif /* MANZI_V2_H_ */

@@ -109,8 +109,13 @@ void INPUT(){
 		if(hDS.BUTTON.CIRCLE){
 			LED_GREEN_T();
 			Button = CIRCLE;
+			/*
 			PARM_SET(&pRoot,ROOT_MAX_SPEED_RPS,ROOT_LAST_ANGLE);
 			PARM_SET(&pTip,TIP_MAX_SPEED_RPS,TIP_LAST_ANGLE);
+			*/
+			//Root‚©‚çŒvŽZ Root‚Í‘æ4ˆø”‚ðTRUE‚É
+			PARM_SET(&pRoot,ROOT_MAX_SPEED_DEG,ROOT_LAST_ANGLE_DEG,1);
+			PARM_SET(&pTip,TIP_MAX_SPEED_DEG,TIP_LAST_ANGLE_DEG,0);
 			/*
 			pRoot.Limit_Speed = ROOT_MAX_SPEED_RPS;
 			pRoot.Move_Angle = ROOT_LAST_ANGLE - pRoot.Now_Angle;
@@ -137,8 +142,8 @@ void INPUT(){
 		else if(hDS.BUTTON.SQUARE){
 			LED_GREEN_T();
 			Button = SQUARE;
-			PARM_SET(&pRoot,ROOT_RETURN_SPEED_RPS,0);
-			PARM_SET(&pTip,TIP_RETURN_SPEED_RPS,0);
+			PARM_SET(&pRoot,ROOT_RETURN_SPEED_RPS,0,1);
+			PARM_SET(&pTip,TIP_RETURN_SPEED_RPS,0,0);
 			/*
 			pRoot.Limit_Speed = ROOT_RETURN_SPEED_RPS;
 			pRoot.Move_Angle = 0 - pRoot.Now_Angle;
@@ -164,8 +169,8 @@ void INPUT(){
 		else if(hDS.BUTTON.TRIANGLE){
 			LED_GREEN_T();
 			Button = CIRCLE;
-			PARM_SET(&pRoot,ROOT_GET_MAX_SPEED_RPS,ROOT_GET_LAST_ANGLE);
-			PARM_SET(&pTip,TIP_GET_MAX_SPEED_RPS,TIP_GET_LAST_ANGLE);
+			PARM_SET(&pRoot,ROOT_GET_MAX_SPEED_RPS,ROOT_GET_LAST_ANGLE,1);
+			PARM_SET(&pTip,TIP_GET_MAX_SPEED_RPS,TIP_GET_LAST_ANGLE,0);
 			if(F_Button == NACT){
 				ROOT_D = ACT;
 				TIP_D = ACT;
@@ -214,9 +219,17 @@ void INPUT(){
 		}
 }
 
-void PARM_SET(mParm *c,double Limit_S, double Last_A){
-	c->Limit_Speed = Limit_S;//ŒÀŠE‘¬“x
-	c->Move_Angle = Last_A - c->Now_Angle;//ˆÚ“®Šp
-	c->Goal_Angle = Last_A;//ÅIŠp
-	c->Speed_Delta = ((Limit_S / fabs(ROOT_ACCEL_TIME)) * ROOT_CONTROLL_TIME);
+void PARM_SET(mParm *c,double Limit_S, double Last_A, uint8_t Flg){
+	double Limit_Speed_RPS = Limit_S / 360.;//rps
+	double Last_Angle_R = Last_A / 360.;//rotation
+	static double Accel_Time = 0;//‰Á‘¬ŽžŠÔ RootŠî€
+	if(Flg == 1) Accel_Time = (((180 * 2) / Limit_S) * 1000.);
+
+	c->Move_Angle = Last_Angle_R - c->Now_Angle;//ˆÚ“®Šp
+	c->Goal_Angle = Last_Angle_R;//ÅIŠp
+
+	if(c->Move_Angle > 0)c->Limit_Speed = Limit_Speed_RPS;//ŒÀŠE‘¬“x	â‘Î’l
+	else c->Limit_Speed = -Limit_Speed_RPS;
+
+	c->Speed_Delta = ((c->Limit_Speed / fabs(Accel_Time)));
 }
