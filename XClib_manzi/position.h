@@ -12,14 +12,7 @@
 
 #define ROOT_ARM 0.295
 #define TIP_ARM 0.375
-#define P_GAIN 32.
-
-extern void POSITION_INIT();
-extern void POSITION_CONTROLL();
-extern void LINEAR_INIT();
-extern void SET_NOW_POSITION();
-extern void SET_REF(double REF_X, double REF_Y, long int time);
-extern void LINEAR_ORBIT();
+#define P_GAIN 126.
 
 typedef struct{
 	double Inref;
@@ -62,6 +55,24 @@ typedef struct{
 }LINEAR;
 LINEAR linear;
 
+typedef struct{
+	double Now_Root_Angle;
+	double Now_Tip_Angle;
+
+	double Ref_Root_Angle;
+	double Ref_Tip_Angle;
+
+	double Step_Root;
+	double Step_Tip;
+
+	double time;
+}ROTATION;
+ROTATION rotation;
+typedef enum{
+	SET_LINEAR,
+	SET_ROTATION
+}SET_SELECT;
+SET_SELECT set_select;
 
 typedef enum {
 	POSITION,
@@ -80,4 +91,14 @@ static double P_Error_2 = 0.;
 static double P_Gain_1 = 1.0;
 static double P_Gain_2 = 1.0;
 */
+
+extern void POSITION_INIT();
+extern void POSITION_CONTROLL();
+extern void LINEAR_INIT();
+extern void ROTATION_INIT();
+extern void SET_NOW_POSITION();
+extern void SET_REF_LINEAR(double REF_X, double REF_Y, long int time);
+extern void LINEAR_ORBIT();
+extern void SET_REF_ROTATION(double REF_ROOT, double REF_TIP, double time);
+extern void ROTATION_ORBIT();
 #endif /* POSITION_H_ */
