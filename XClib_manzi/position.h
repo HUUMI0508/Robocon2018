@@ -12,7 +12,7 @@
 
 #define ROOT_ARM 0.295
 #define TIP_ARM 0.375
-#define P_GAIN 126.
+#define P_GAIN 140.
 
 typedef struct{
 	double Inref;
@@ -80,6 +80,15 @@ typedef enum {
 	STOP
 } MODE;
 MODE PS_MODE;
+
+typedef enum{
+	cSTOP,
+	cMIDSTREAM,
+	cEND
+}C_SEQUENCE;
+C_SEQUENCE c_sequence;
+
+
 /*
 static double Inref_1 = 0.;
 static double Inref_2 = 0.;
@@ -101,4 +110,5 @@ extern void SET_REF_LINEAR(double REF_X, double REF_Y, long int time);
 extern void LINEAR_ORBIT();
 extern void SET_REF_ROTATION(double REF_ROOT, double REF_TIP, double time);
 extern void ROTATION_ORBIT();
+extern void CATCH_SEQUENCE();
 #endif /* POSITION_H_ */

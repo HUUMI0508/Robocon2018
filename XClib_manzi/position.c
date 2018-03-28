@@ -24,6 +24,9 @@ void POSITION_INIT(){
 	//con2.P_Gain = T_CONSTRPV_BCH * OMEGA_BCH * OMEGA_BCH;//126.0;
 	con2.P_Gain = P_GAIN;
 
+	c_sequence = cSTOP;
+	flg = FALSE;
+
 }
 void LINEAR_INIT(){
 	linear.Now_X_Point = 0.;//-0.3;
@@ -75,33 +78,15 @@ void POSITION_CONTROLL(){
 	if(PS_MODE == POSITION){
 		con1.P_Error = (con1.Inref_P - henc1.qDeg) / 360;//目標との差分
 		con1.Inref = con1.P_Error * con1.P_Gain;//差分にゲインをかけて速度目標値にする
-	//	if(con1.Inref > con1.Limit) con1.Inref = con1.Limit;
-	//	else if(con1.Inref < -con1.Limit) con1.Inref = -con1.Limit;
 
 		con2.P_Error = (con2.Inref_P - henc2.qDeg) / 360;
 		con2.Inref = con2.P_Error * con2.P_Gain;
-	//	if(con2.Inref > con2.Limit) con2.Inref = con2.Limit;
-	//	else if(con2.Inref < -con2.Limit) con2.Inref = -con2.Limit;
 
-	//	setInRef(&hpi1,con1.Inref);//速度目標値を代入//Root
-	//	setInRef(&hpi2,con2.Inref);				  //Tip
 		setInRef(&hmtr1.pPIParm,con1.Inref);
 		setInRef(&hmtr2.pPIParm,con2.Inref);
 
-//		hpwm1 = getCalcPWM(&hpi1, &henc1);//PI計算 +PWM出力
-//		hpwm2 = getCalcPWM(&hpi2, &henc2);
 		CalcVelPWM(&hmtr1, hmtr1.pPIParm.qInRef - hmtr1.pEncParm->qFreq);	//ref - res
 		CalcVelPWM(&hmtr2, hmtr2.pPIParm.qInRef - hmtr2.pEncParm->qFreq);	//ref - res
-		/*
-		P_Error_1 = Inref_P_1 - henc1.qAngle;
-		Inref_1 = P_Error_1 * P_Gain_1;
-
-		P_Error_2 = Inref_P_2 - henc2.qAngle;
-		Inref_2 = P_Error_2 * P_Gain_2;
-
-		setInRef(&hpi1,Inref_1);
-		setInRef(&hpi1,Inref_2);
-		*/
 	}
 	else if(PS_MODE == SPEED){
 		setInRef(&hmtr1.pPIParm,con1.Inref);
@@ -278,5 +263,43 @@ void ROTATION_ORBIT(){
 	//	xprint(&huart4,"count  %d.%d \r\n",gan(count),dec(count,100));
 	}
 
+}
+
+void CATCH_SEQUENCE(){
+	switch(c_sequence){
+	case cSTOP:
+		flg = FALSE;
+		break;
+	case cMIDSTREAM:
+		//ROTATION_MOVE = ACT;
+		if(flg == FALSE){
+			set_select = SET_ROTATION;
+			SET_NOW_POSITION();
+			SET_REF_ROTATION(0, 150, 1000.);
+			//F_Button = ACT;
+			ROTATION_MOVE = ACT;
+			flg = TRUE;
+		}
+		if((flg == TRUE) && (ROTATION_MOVE == NACT)){
+			flg = FALSE;
+			c_sequence = cEND;
+		}
+		break;
+	case cEND:
+		//ROTATION_MOVE = ACT;
+		if(flg == FALSE){
+			set_select = SET_ROTATION;
+			SET_NOW_POSITION();
+			SET_REF_ROTATION(160, 40, 1000.);
+			ROTATION_MOVE = ACT;
+			flg = TRUE;
+			//F_Button = ACT;
+		}
+		if((flg == TRUE) && (ROTATION_MOVE == NACT)){
+			flg = FALSE;
+			c_sequence = cSTOP;
+		}
+		break;
+	}
 }
 

@@ -13,7 +13,7 @@
 
 
 //根本用モータパラ
-#define ROOT_MAX_SPEED_DEG		-180.		//deg/s//1151
+#define ROOT_MAX_SPEED_DEG		-720.		//deg/s//1151
 #define ROOT_ACCEL_TIME		(((180 * 2) / ROOT_MAX_SPEED_DEG) * 1000.)	//ms
 #define ROOT_MAX_SPEED_RPS 	(ROOT_MAX_SPEED_DEG / 360.)	//rps
 

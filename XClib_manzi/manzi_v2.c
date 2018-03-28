@@ -174,18 +174,21 @@ void INPUT(){
 				F_Button = ACT;
 			}
 		}
+		/*
 		else if(hDS.BUTTON.L1){
 			if(F_Button == NACT){
 				HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_0);//“dŽ¥•Ù3 OFF
 				F_Button = ACT;
 			}
 		}
+
 		else if(hDS.BUTTON.L2){
 			if(F_Button == NACT){
 				HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_1);//“dŽ¥•Ù3 OFF
 				F_Button = ACT;
 			}
 		}
+		*/
 		else if(hDS.BUTTON.CROSS){
 			LED_ORANGE_T();
 			protect.Lag_Count = 0;
@@ -198,11 +201,14 @@ void INPUT(){
 
 		else if(hDS.BUTTON.R1){
 			if(F_Button == NACT){
+				c_sequence = cMIDSTREAM;
+						/*
 				set_select = SET_ROTATION;
 				SET_NOW_POSITION();
-				SET_REF_ROTATION(90, 90, 5000.);
+				SET_REF_ROTATION(0, 70, 1000.);
 				ROTATION_MOVE = ACT;
 				F_Button = ACT;
+				*/
 			}
 			/*
 			SET_NOW_POSITION();
@@ -215,17 +221,36 @@ void INPUT(){
 			if(F_Button == NACT){
 				set_select = SET_ROTATION;
 				SET_NOW_POSITION();
-				SET_REF_ROTATION(0, 0, 5000.);
+				SET_REF_ROTATION(160, 40, 1000.);
 				ROTATION_MOVE = ACT;
 				F_Button = ACT;
 			}
+		}
+		else if(hDS.BUTTON.L1){
+			if(F_Button == NACT){
+				set_select = SET_ROTATION;
+				SET_NOW_POSITION();
+				SET_REF_ROTATION(0, 70, 3000.);
+				ROTATION_MOVE = ACT;
+				F_Button = ACT;
+			}
+		}
+		else if(hDS.BUTTON.L2){
+			if(F_Button == NACT){
+				set_select = SET_ROTATION;
+				SET_NOW_POSITION();
+				SET_REF_ROTATION(0, 0, 3000.);
+				ROTATION_MOVE = ACT;
+				F_Button = ACT;
+			}
+		}
 			/*
 			SET_NOW_POSITION();
 			SET_REF(0.67, 0.0,1000);
 			LINEAR_MOVE = ACT;
 			LINEAR_ORBIT();
 			*/
-		}
+
 
 		else{
 			if(F_Button == ACT) F_Button = NACT;
