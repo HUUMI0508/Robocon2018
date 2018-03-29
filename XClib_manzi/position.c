@@ -25,7 +25,15 @@ void POSITION_INIT(){
 	con2.P_Gain = P_GAIN;
 
 	c_sequence = cSTOP;
-	flg = FALSE;
+	c_sequence2 = cSTOP;
+	origin = oSTOP;
+	flg = NACT;
+	oflg = NACT;
+
+	offset_root.Angle_Deg = 0.;
+	offset_root.Angle_R   = 0.;
+	offset_tip.Angle_Deg  = 0.;
+	offset_tip.Angle_R    = 0.;
 
 }
 void LINEAR_INIT(){
@@ -59,6 +67,17 @@ void LINEAR_INIT(){
 
 }
 void ROTATION_INIT(){
+	rotation.Now_Root_Angle = 0.;
+	rotation.Now_Tip_Angle = 0.;
+
+	rotation.Ref_Root_Angle = 0.;
+	rotation.Ref_Tip_Angle = 0.;
+
+	rotation.Step_Root = 0.;
+	rotation.Step_Tip = 0.;
+
+	rotation.time = 1000;
+	ROTATION_MOVE = NACT;
 
 }
 void POSITION_CONTROLL(){
@@ -76,10 +95,10 @@ void POSITION_CONTROLL(){
 
 	//Position_Controll
 	if(PS_MODE == POSITION){
-		con1.P_Error = (con1.Inref_P - henc1.qDeg) / 360;//目標との差分
+		con1.P_Error = ((con1.Inref_P - offset_root.Angle_Deg) - (henc1.qDeg - offset_root.Angle_Deg)) / 360;//目標との差分
 		con1.Inref = con1.P_Error * con1.P_Gain;//差分にゲインをかけて速度目標値にする
 
-		con2.P_Error = (con2.Inref_P - henc2.qDeg) / 360;
+		con2.P_Error = ((con2.Inref_P - offset_tip.Angle_Deg) - (henc2.qDeg - offset_tip.Angle_Deg)) / 360;
 		con2.Inref = con2.P_Error * con2.P_Gain;
 
 		setInRef(&hmtr1.pPIParm,con1.Inref);
@@ -239,7 +258,7 @@ void ROTATION_ORBIT(){
 			pRoot.Now_Angle = con1.Inref_P / 360.;
 			pTip.Now_Angle = con2.Inref_P / 360.;
 			#if 1
-				printf("debug rotation finish");
+				printf("debug rotation finish\r\n");
 				xprint(&huart4,"con1.Inref_P  %d.%d \r\n",gan(con1.Inref_P),dec(con1.Inref_P,100));
 				xprint(&huart4,"con2.Inref_P  %d.%d \r\n",gan(con2.Inref_P),dec(con2.Inref_P,100));
 				xprint(&huart4,"pRoot.Now_Angle  %d.%d \r\n",gan(pRoot.Now_Angle),dec(pRoot.Now_Angle,100));
@@ -268,38 +287,80 @@ void ROTATION_ORBIT(){
 void CATCH_SEQUENCE(){
 	switch(c_sequence){
 	case cSTOP:
-		flg = FALSE;
+		flg = NACT;
 		break;
 	case cMIDSTREAM:
 		//ROTATION_MOVE = ACT;
-		if(flg == FALSE){
+		if(flg == NACT){
 			set_select = SET_ROTATION;
 			SET_NOW_POSITION();
-			SET_REF_ROTATION(0, 150, 1000.);
-			//F_Button = ACT;
+			SET_REF_ROTATION(c_position[0][0],c_position[0][1] , c_position[0][2]);
 			ROTATION_MOVE = ACT;
-			flg = TRUE;
+			flg = ACT;
 		}
-		if((flg == TRUE) && (ROTATION_MOVE == NACT)){
-			flg = FALSE;
+		if((flg == ACT) && (ROTATION_MOVE == NACT)){
+			flg = NACT;
 			c_sequence = cEND;
 		}
 		break;
 	case cEND:
-		//ROTATION_MOVE = ACT;
-		if(flg == FALSE){
+		if(flg == NACT){
 			set_select = SET_ROTATION;
 			SET_NOW_POSITION();
-			SET_REF_ROTATION(160, 40, 1000.);
+			SET_REF_ROTATION(c_position[1][0],c_position[1][1] , c_position[1][2]);
 			ROTATION_MOVE = ACT;
-			flg = TRUE;
-			//F_Button = ACT;
+			flg = ACT;
 		}
-		if((flg == TRUE) && (ROTATION_MOVE == NACT)){
-			flg = FALSE;
+		if((flg == ACT) && (ROTATION_MOVE == NACT)){
+			//CATCH_POSITION_FINISH = ACT;
+			READY = NACT;
 			c_sequence = cSTOP;
 		}
 		break;
 	}
 }
 
+void SET_STARTING_POINT(){
+	photo1 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_0);//B0
+	photo2 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_1);//B1
+	switch(origin){
+	case oSTOP:
+		break;
+	case MOVE_ROOT:
+		PS_MODE = SPEED;
+		con1.Inref = 0.1;
+		con2.Inref = -0.1;
+		if(photo1 == GPIO_PIN_RESET){
+			printf("photo1====PIN_SET\r\n");
+			origin = SET_ROOT;
+		}
+		break;
+	case SET_ROOT:
+		con1.Inref = 0.;
+		con2.Inref = 0.;
+		origin = MOVE_TIP;
+		break;
+	case MOVE_TIP:
+		PS_MODE = SPEED;
+		//con1.Inref = 0.1;
+		con2.Inref = 0.1;
+		if(photo2 == GPIO_PIN_RESET){
+			printf("photo2====PIN_SET\r\n");
+			origin = SET_TIP;
+		}
+		break;
+	case SET_TIP:
+		con1.Inref = 0.;
+		con2.Inref = 0.;
+
+		offset_root.Angle_Deg = henc1.qDeg;
+		offset_root.Angle_R = offset_root.Angle_Deg / 360.;
+		offset_tip.Angle_Deg = henc2.qDeg;
+		offset_tip.Angle_R = offset_tip.Angle_Deg / 360.;
+
+		PS_MODE = POSITION;
+		INIT_FINISH = ACT;
+		origin = oSTOP;
+		break;
+	}
+}

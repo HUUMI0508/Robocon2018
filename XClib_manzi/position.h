@@ -87,8 +87,26 @@ typedef enum{
 	cEND
 }C_SEQUENCE;
 C_SEQUENCE c_sequence;
+C_SEQUENCE c_sequence2;
 
+typedef enum{
+	oSTOP,
+	MOVE_ROOT,
+	SET_ROOT,
+	MOVE_TIP,
+	SET_TIP
+}ORIGIN;
+ORIGIN origin;
+FLG oflg;
 
+typedef struct{
+	double Angle_Deg;
+	double Angle_R;
+}OFFSET;
+OFFSET offset_root;
+OFFSET offset_tip;
+
+FLG flg;
 /*
 static double Inref_1 = 0.;
 static double Inref_2 = 0.;
@@ -111,4 +129,5 @@ extern void LINEAR_ORBIT();
 extern void SET_REF_ROTATION(double REF_ROOT, double REF_TIP, double time);
 extern void ROTATION_ORBIT();
 extern void CATCH_SEQUENCE();
+extern void SET_STARTING_POINT();
 #endif /* POSITION_H_ */

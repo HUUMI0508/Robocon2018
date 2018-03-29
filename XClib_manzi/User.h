@@ -115,10 +115,38 @@ tMD md4;
 FLG LINEAR_MOVE;
 FLG ROTATION_MOVE;
 FLG CONTROLL_START;
-FLG flg;
+
+typedef enum{
+	START,
+	INIT,
+	CATCH_POSITION,
+	CATCH_SHUTLE,
+	THROW_READY,
+	FIRE,
+	END,
+}PAISEN;
+PAISEN paisen;
+FLG INIT_FINISH;
+//FLG CATCH_POSITION_FINISH;
+
+typedef enum{
+	Z1,
+	Z2,
+	Z3
+}THROW_ZONE;
+THROW_ZONE throw_zone;
+
+FLG CATCH;
+FLG READY;
+FLG THROW;
+FLG RELOAD;
+
 extern void task_1(void);
 extern void InitUSER(void);
 extern void ms1(void);
 extern void ms50(void);
+extern void PAISEN_SEQUENCE(void);
+
+double c_position[2][3];
 
 #endif /* USER_H_ */
