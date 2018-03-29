@@ -125,33 +125,33 @@ void INPUT(){
 	//SW2 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14);//E9
 	//éÀèo
 	if(hDS.BUTTON.CROSS)command.CROSS = ACT;
-	else command.CROSS = NACT;
+	//else command.CROSS = NACT;
 	if(hDS.BUTTON.SQUARE)command.SQUARE = ACT;
-	else command.SQUARE = NACT;
+	//else command.SQUARE = NACT;
 	if(hDS.BUTTON.TRIANGLE)command.TRIANGLE = ACT;
-	else command.TRIANGLE = NACT;
+	//else command.TRIANGLE = NACT;
 	if(hDS.BUTTON.CIRCLE)command.CIRCLE = ACT;
-	else command.CIRCLE = NACT;
+	//else command.CIRCLE = NACT;
 
 	if(hDS.BUTTON.L1)command.L1 = ACT;
-	else command.L1 = NACT;
+	//else command.L1 = NACT;
 	if(hDS.BUTTON.L2)command.L2 = ACT;
-	else command.L2 = NACT;
+	//else command.L2 = NACT;
 	if(hDS.BUTTON.L3)command.L3 = ACT;
-	else command.L3 = NACT;
+	//else command.L3 = NACT;
 	if(hDS.BUTTON.R1)command.R1 = ACT;
-	else command.R1 = NACT;
+	//else command.R1 = NACT;
 	if(hDS.BUTTON.R2)command.R2 = ACT;
-	else command.R2 = NACT;
+	//else command.R2 = NACT;
 
 	if(hDS.BUTTON.UP)command.UP = ACT;
-	else command.UP = NACT;
+	//else command.UP = NACT;
 	if(hDS.BUTTON.LEFT)command.LEFT = ACT;
-	else command.LEFT = NACT;
+	//else command.LEFT = NACT;
 	if(hDS.BUTTON.RIGHT)command.RIGHT = ACT;
-	else command.RIGHT = NACT;
+	//else command.RIGHT = NACT;
 	if(hDS.BUTTON.DOWN)command.DOWN = ACT;
-	else command.DOWN = NACT;
+	//else command.DOWN = NACT;
 
 #if 0
 		if(hDS.BUTTON.CIRCLE){//GOLDEN
@@ -321,7 +321,7 @@ void INPUT(){
 			command.L2 = NACT;
 		}
 		if(command.L3 == ACT){
-			//origin = MOVE_ROOT;
+			origin = MOVE_ROOT;
 			paisen = INIT;
 			command.L3 = NACT;
 		}
@@ -355,15 +355,26 @@ void INPUT(){
 
 
 		if(command.UP == ACT){
+			THROW = ACT;
 			command.UP = NACT;
 		}
 		if(command.LEFT == ACT){
+			LED_ORANGE_T();
+			protect.Lag_Count = 0;
+			con1.P_Gain = 0;
+			con2.P_Gain = 0;
+			THROW = NACT;
+			RELOAD = NACT;
+			PS_MODE = STOP;
+			Fire = NACT;
 			command.LEFT = NACT;
 		}
 		if(command.RIGHT == ACT){
+			READY = ACT;
 			command.RIGHT = NACT;
 		}
 		if(command.DOWN == ACT){
+			CATCH = ACT;
 			command.DOWN = NACT;
 		}
 #endif

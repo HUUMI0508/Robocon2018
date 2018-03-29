@@ -93,7 +93,7 @@ tMD md4;
 
 #elif 1 // maxson junsei
 // ACH
-#define GEAR_RATIO_Gm_ACH	1/39.0
+#define GEAR_RATIO_Gm_ACH	1/26.0//39
 #define GEAR_RATIO_Ge_ACH	1
 #define PPR_ACH				100
 #define T_CONSTRPV_ACH		35
@@ -102,7 +102,7 @@ tMD md4;
 #define ZETA_ACH			1.0
 //tDIRECTION ENC_ACH = CLOCKWISE;
 // BCH
-#define GEAR_RATIO_Gm_BCH	1/39.0
+#define GEAR_RATIO_Gm_BCH	1/26.0
 #define GEAR_RATIO_Ge_BCH	1
 #define PPR_BCH				100
 #define T_CONSTRPV_BCH		35

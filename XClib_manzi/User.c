@@ -19,6 +19,7 @@ void InitUSER(void){
 
 	INIT_FINISH = NACT;
 	//CATCH_POSITION_FINISH = NACT;
+	throw_zone = Z2;
 	CATCH = NACT;
 	READY = NACT;
 	THROW = NACT;
@@ -32,6 +33,7 @@ void InitUSER(void){
 
 	//HAL_Delay(500);
 	CONTROLL_START = ACT;
+	//origin = MOVE_ROOT;
 	//paisen = INIT;
 	printf("Initialize finished\r\n");
 }
@@ -62,6 +64,8 @@ void ms50(void){
 		if(PS_MODE == STOP)printf("STOP\r\n");
 		printf("%d\r\n",origin);
 		printf("%d\r\n",c_sequence);
+		printf("%d\r\n",paisen);
+		printf("%d\r\n",READY);
 		xprint(&huart4," %d.%d %d.%d\r\n",gan((hmtr1.qDuty)),dec((hmtr1.qDuty),100),gan((hmtr2.qDuty)),dec((hmtr2.qDuty),100));
 		xprint(&huart4," %d.%d %d.%d\r\n",gan((pRoot.Speed * 360 )),dec((pRoot.Speed * 360),100),gan((pTip.Speed * 360)),dec((pTip.Speed * 360),100));
 		xprint(&huart4," %d.%d %d.%d\r\n",gan((pRoot.Angle * 360 )),dec((pRoot.Angle * 360),100),gan((pTip.Angle * 360)),dec((pTip.Angle * 360),100));
@@ -100,7 +104,6 @@ void PAISEN_SEQUENCE(){
 	case START:
 		break;
 	case INIT://イニシャライズ
-		origin = MOVE_ROOT;
 		if(INIT_FINISH == ACT){
 			paisen = CATCH_POSITION;
 		}
@@ -115,11 +118,11 @@ void PAISEN_SEQUENCE(){
 	case CATCH_SHUTLE:
 		if(CATCH == ACT){
 			command.R3 = ACT;
-			CATCH = NACT;
 			paisen = THROW_READY;
 		}
 		break;
 	case THROW_READY:
+		CATCH = NACT;
 		if(READY == ACT){
 			command.R2 = ACT;
 			paisen = FIRE;
