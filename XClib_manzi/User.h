@@ -95,7 +95,7 @@ tMD md4;
 // ACH
 #define GEAR_RATIO_Gm_ACH	1/26.0//39
 #define GEAR_RATIO_Ge_ACH	1
-#define PPR_ACH				100
+#define PPR_ACH				500
 #define T_CONSTRPV_ACH		35
 #define RPV_ACH				317
 #define OMEGA_ACH			20
@@ -104,7 +104,7 @@ tMD md4;
 // BCH
 #define GEAR_RATIO_Gm_BCH	1/26.0
 #define GEAR_RATIO_Ge_BCH	1
-#define PPR_BCH				100
+#define PPR_BCH				500
 #define T_CONSTRPV_BCH		35
 #define RPV_BCH				317
 #define OMEGA_BCH			20
@@ -139,7 +139,9 @@ THROW_ZONE throw_zone;
 FLG CATCH;
 FLG READY;
 FLG THROW;
+
 FLG RELOAD;
+FLG LAG;
 
 extern void task_1(void);
 extern void InitUSER(void);

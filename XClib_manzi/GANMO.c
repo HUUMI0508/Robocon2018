@@ -9,7 +9,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 #if 1/*** Encoder Calculate ***/
 		CalcENC(&henc1);
 		CalcENC(&henc2);
-		CalcENC(&henc3);
+		//CalcENC(&henc3);
 		//CalcENC(&henc4);
 #endif
 #if 1/*** Motor Control Calculate ***/
@@ -73,7 +73,7 @@ void InitGANMO(void) {
 	InitENC(&henc1, ENC1, 1, GEAR_RATIO_Gm_ACH, GEAR_RATIO_Ge_ACH, PPR_ACH, COUNTERCLOCKWISE);//Root
 //	InitENC(&henc1, ENC1, 1, 1/1, 1, 100, CLOCKWISE);//Root
 	InitENC(&henc2, ENC2, 1, GEAR_RATIO_Gm_BCH, GEAR_RATIO_Ge_BCH, PPR_BCH, COUNTERCLOCKWISE);//Tip
-	InitENC(&henc3, ENC3, 1, 14 / 46.0, 1, 100, CLOCKWISE);				// encoder initialize
+	//InitENC(&henc3, ENC3, 1, 14 / 46.0, 1, 100, CLOCKWISE);				// encoder initialize
 //	InitENC(&henc4, ENC4, 1, 1 / 26.0, 1, 100, CLOCKWISE);				// encoder initialize
 #endif
 #if 0/*** Motor Control Initialize in GANMO***/

@@ -29,6 +29,7 @@ void POSITION_INIT(){
 	origin = oSTOP;
 	flg = NACT;
 	oflg = NACT;
+	LAG = NACT;
 
 	offset_root.Angle_Deg = 0.;
 	offset_root.Angle_R   = 0.;
@@ -87,18 +88,20 @@ void POSITION_CONTROLL(){
 		con2.P_Gain = (protect.Lag_Count / PROTECT_TIME) * P_GAIN;
 		PS_MODE = POSITION;
 		protect.Lag_Count++;
+		LAG = ACT;
 	}
 	else{
-		con1.P_Gain = 1.;
-		con2.P_Gain = 1.;
+		con1.P_Gain = P_GAIN;
+		con2.P_Gain = P_GAIN;
+		LAG = NACT;
 	}
 
 	//Position_Controll
 	if(PS_MODE == POSITION){
-		con1.P_Error = ((con1.Inref_P - offset_root.Angle_Deg) - (henc1.qDeg - offset_root.Angle_Deg)) / 360;//目標との差分
+		con1.P_Error = ((con1.Inref_P + offset_root.Angle_Deg) - (henc1.qDeg)) / 360;//目標との差分
 		con1.Inref = con1.P_Error * con1.P_Gain;//差分にゲインをかけて速度目標値にする
 
-		con2.P_Error = ((con2.Inref_P - offset_tip.Angle_Deg) - (henc2.qDeg - offset_tip.Angle_Deg)) / 360;
+		con2.P_Error = ((con2.Inref_P + offset_tip.Angle_Deg) - (henc2.qDeg)) / 360;
 		con2.Inref = con2.P_Error * con2.P_Gain;
 
 		setInRef(&hmtr1.pPIParm,con1.Inref);
@@ -143,7 +146,7 @@ void SET_NOW_POSITION(){
 		linear.Tip_Length = sqrt((linear.Now_X_Point * linear.Now_X_Point) + (linear.Now_Y_Point * linear.Now_Y_Point));
 		linear.Tip_Angle_Deg = (double)((((int)(((atan2(linear.Now_Y_Point, linear.Now_X_Point)) * 180) / M_PI))) % 360);
 		linear.Tip_Angle = (linear.Tip_Angle_Deg / 180) * M_PI;
-	#if 1
+	#if 0
 		xprint(&huart4,"Angle_Arm1  %d.%d \r\n",gan(linear.Angle_Arm1),dec(linear.Angle_Arm1,100));
 		xprint(&huart4," 		 2  %d.%d \r\n",gan(linear.Angle_Arm2),dec(linear.Angle_Arm2,100));
 		xprint(&huart4,"Now_X_Point %d.%d \r\n",gan(linear.Now_X_Point),dec(linear.Now_X_Point,100));
@@ -154,9 +157,9 @@ void SET_NOW_POSITION(){
 	#endif
 	}
 	else if(set_select == SET_ROTATION){
-		rotation.Now_Root_Angle = henc1.qDeg;
-		rotation.Now_Tip_Angle = henc2.qDeg + henc1.qDeg;
-	#if 1
+		rotation.Now_Root_Angle = henc1.qDeg - offset_root.Angle_Deg;
+		rotation.Now_Tip_Angle = henc2.qDeg + henc1.qDeg - offset_tip.Angle_Deg;
+	#if 0
 		xprint(&huart4,"rotation.Now_Root_Angle  %d.%d \r\n",gan(rotation.Now_Root_Angle),dec(rotation.Now_Root_Angle,100));
 		xprint(&huart4,"rotation.Now_Tip_Angle   %d.%d \r\n",gan(rotation.Now_Tip_Angle),dec(rotation.Now_Tip_Angle,100));
 	#endif

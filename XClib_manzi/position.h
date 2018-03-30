@@ -12,7 +12,7 @@
 
 #define ROOT_ARM 0.295
 #define TIP_ARM 0.375
-#define P_GAIN 140.
+#define P_GAIN 2.
 
 typedef struct{
 	double Inref;

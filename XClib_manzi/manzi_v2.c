@@ -69,7 +69,7 @@ void MOTOR_CONTROLL(){
 			//速度加算
 			pRoot.Speed += pRoot.Speed_Delta;
 			//角度崇徳
-			pRoot.Angle = (henc1.qDeg / 360.) - offset_root.Angle_R;
+			pRoot.Angle = (henc1.qDeg / 360.) + offset_root.Angle_R;
 			//速度制限
 			if(fabs(pRoot.Speed) >= fabs(pRoot.Limit_Speed)) pRoot.Speed = pRoot.Limit_Speed;
 
@@ -86,7 +86,7 @@ void MOTOR_CONTROLL(){
 		}
 		if(TIP_D == ACT){
 			pTip.Speed += pTip.Speed_Delta;
-			pTip.Angle = (henc2.qDeg / 360.) - offset_tip.Angle_R;
+			pTip.Angle = (henc2.qDeg / 360.) + offset_tip.Angle_R;
 			if(fabs(pTip.Speed) >= fabs(pTip.Limit_Speed)) pTip.Speed = pTip.Limit_Speed;
 
 			con2.Inref = (pTip.Speed - pRoot.Speed);
@@ -124,6 +124,7 @@ void INPUT(){
 	//SW1 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_15);//B2
 	//SW2 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14);//E9
 	//射出
+#if 1
 	if(hDS.BUTTON.CROSS)command.CROSS = ACT;
 	//else command.CROSS = NACT;
 	if(hDS.BUTTON.SQUARE)command.SQUARE = ACT;
@@ -152,6 +153,8 @@ void INPUT(){
 	//else command.RIGHT = NACT;
 	if(hDS.BUTTON.DOWN)command.DOWN = ACT;
 	//else command.DOWN = NACT;
+#endif
+
 
 #if 0
 		if(hDS.BUTTON.CIRCLE){//GOLDEN

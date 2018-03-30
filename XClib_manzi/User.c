@@ -148,9 +148,11 @@ void PAISEN_SEQUENCE(){
 		break;
 	case END:
 		if(THROW == NACT){
-			RELOAD = ACT;
-			command.SQUARE = ACT;
-			paisen = CATCH_POSITION;
+			if(LAG == NACT){
+				RELOAD = ACT;
+				command.SQUARE = ACT;
+				paisen = CATCH_POSITION;
+			}
 		}
 		break;
 	}
