@@ -98,10 +98,10 @@ void POSITION_CONTROLL(){
 
 	//Position_Controll
 	if(PS_MODE == POSITION){
-		con1.P_Error = ((con1.Inref_P + offset_root.Angle_Deg) - (henc1.qDeg)) / 360;//目標との差分
+		con1.P_Error = ((con1.Inref_P + offset_root.Angle_Deg) - (henc3.qDeg)) / 360;//目標との差分
 		con1.Inref = con1.P_Error * con1.P_Gain;//差分にゲインをかけて速度目標値にする
 
-		con2.P_Error = ((con2.Inref_P + offset_tip.Angle_Deg) - (henc2.qDeg)) / 360;
+		con2.P_Error = ((con2.Inref_P + offset_tip.Angle_Deg) - (henc4.qDeg)) / 360;
 		con2.Inref = con2.P_Error * con2.P_Gain;
 
 		setInRef(&hmtr1.pPIParm,con1.Inref);
@@ -134,8 +134,8 @@ void POSITION_CONTROLL(){
 
 void SET_NOW_POSITION(){
 	if(set_select == SET_LINEAR){
-		linear.Angle_Arm1 = (henc1.qDeg * M_PI)/180;
-		linear.Angle_Arm2 = (henc2.qDeg * M_PI)/180;
+		linear.Angle_Arm1 = (henc3.qDeg * M_PI)/180;
+		linear.Angle_Arm2 = (henc4.qDeg * M_PI)/180;
 
 		linear.Now_X_Point = (ROOT_ARM * cos(linear.Angle_Arm1)) + (TIP_ARM * cos(linear.Angle_Arm1 + linear.Angle_Arm2));
 		linear.Now_Y_Point = (ROOT_ARM * sin(linear.Angle_Arm1)) + (TIP_ARM * sin(linear.Angle_Arm1 + linear.Angle_Arm2));
@@ -157,8 +157,8 @@ void SET_NOW_POSITION(){
 	#endif
 	}
 	else if(set_select == SET_ROTATION){
-		rotation.Now_Root_Angle = henc1.qDeg - offset_root.Angle_Deg;
-		rotation.Now_Tip_Angle = henc2.qDeg + henc1.qDeg - offset_tip.Angle_Deg;
+		rotation.Now_Root_Angle = henc3.qDeg - offset_root.Angle_Deg;
+		rotation.Now_Tip_Angle = henc4.qDeg + rotation.Now_Root_Angle - offset_tip.Angle_Deg;
 	#if 0
 		xprint(&huart4,"rotation.Now_Root_Angle  %d.%d \r\n",gan(rotation.Now_Root_Angle),dec(rotation.Now_Root_Angle,100));
 		xprint(&huart4,"rotation.Now_Tip_Angle   %d.%d \r\n",gan(rotation.Now_Tip_Angle),dec(rotation.Now_Tip_Angle,100));
@@ -327,13 +327,14 @@ void SET_STARTING_POINT(){
 	photo1 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_0);//B0
 	photo2 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_1);//B1
 	switch(origin){
+	static double temporary_offset = 0;
 	case oSTOP:
 		break;
 	case MOVE_ROOT:
 		PS_MODE = SPEED;
 		con1.Inref = 0.1;
 		con2.Inref = -0.1;
-		if(photo1 == GPIO_PIN_RESET){
+		if(photo1 == GPIO_PIN_SET){
 			printf("photo1====PIN_SET\r\n");
 			origin = SET_ROOT;
 		}
@@ -341,13 +342,16 @@ void SET_STARTING_POINT(){
 	case SET_ROOT:
 		con1.Inref = 0.;
 		con2.Inref = 0.;
+		offset_root.Angle_Deg = henc3.qDeg;
+		offset_root.Angle_R = offset_root.Angle_Deg / 360.;
+		temporary_offset = 0;
 		origin = MOVE_TIP;
 		break;
 	case MOVE_TIP:
 		PS_MODE = SPEED;
 		//con1.Inref = 0.1;
 		con2.Inref = 0.1;
-		if(photo2 == GPIO_PIN_RESET){
+		if(photo2 == GPIO_PIN_SET){
 			printf("photo2====PIN_SET\r\n");
 			origin = SET_TIP;
 		}
@@ -355,10 +359,8 @@ void SET_STARTING_POINT(){
 	case SET_TIP:
 		con1.Inref = 0.;
 		con2.Inref = 0.;
-
-		offset_root.Angle_Deg = henc1.qDeg;
-		offset_root.Angle_R = offset_root.Angle_Deg / 360.;
-		offset_tip.Angle_Deg = henc2.qDeg;
+		temporary_offset = henc3.qDeg;
+		offset_tip.Angle_Deg = henc4.qDeg - (temporary_offset - offset_root.Angle_Deg);
 		offset_tip.Angle_R = offset_tip.Angle_Deg / 360.;
 
 		PS_MODE = POSITION;

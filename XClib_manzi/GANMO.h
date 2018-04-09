@@ -101,6 +101,6 @@ void PinModeChange(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t mode) {
 
 uint8_t rx_buf[256];
 
-#include "User.h"
+#include "User_mura.h"
 extern void InitGANMO(void);
 #endif

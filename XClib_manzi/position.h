@@ -8,7 +8,7 @@
 #ifndef POSITION_H_
 #define POSITION_H_
 #include "GANMO.h"
-#include "User.h"
+//#include "User_mura.h"
 
 #define ROOT_ARM 0.295
 #define TIP_ARM 0.375

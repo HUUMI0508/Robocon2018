@@ -7,8 +7,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	CalcMachinePosition(&hodometry);
 #endif
 #if 1/*** Encoder Calculate ***/
-		CalcENC(&henc1);
-		CalcENC(&henc2);
+		CalcENC(&henc3);
+		CalcENC(&henc4);
 		//CalcENC(&henc3);
 		//CalcENC(&henc4);
 #endif
@@ -70,9 +70,9 @@ void InitGANMO(void) {
 	InitOdometry (&hodometry, &henc1, &henc2, &hgyro, 1, 0.048);
 #endif
 #if 1/*** Encoder Initialize ***/
-	InitENC(&henc1, ENC1, 1, GEAR_RATIO_Gm_ACH, GEAR_RATIO_Ge_ACH, PPR_ACH, COUNTERCLOCKWISE);//Root
+	InitENC(&henc3, ENC3, 1, GEAR_RATIO_Gm_ACH, GEAR_RATIO_Ge_ACH, PPR_ACH, COUNTERCLOCKWISE);//Root
 //	InitENC(&henc1, ENC1, 1, 1/1, 1, 100, CLOCKWISE);//Root
-	InitENC(&henc2, ENC2, 1, GEAR_RATIO_Gm_BCH, GEAR_RATIO_Ge_BCH, PPR_BCH, COUNTERCLOCKWISE);//Tip
+	InitENC(&henc4, ENC4, 1, GEAR_RATIO_Gm_BCH, GEAR_RATIO_Ge_BCH, PPR_BCH, COUNTERCLOCKWISE);//Tip
 	//InitENC(&henc3, ENC3, 1, 14 / 46.0, 1, 100, CLOCKWISE);				// encoder initialize
 //	InitENC(&henc4, ENC4, 1, 1 / 26.0, 1, 100, CLOCKWISE);				// encoder initialize
 #endif
@@ -86,7 +86,8 @@ void InitGANMO(void) {
 	InitCAN(&hcan1);				// can1 initialize
 	InitMotorDriver(&hcan1, &md1, ID1, ACH, MODE_OpenLoop);
 	MotorDriveOpenLoop(&md1, 0);
-	InitMotorDriver(&hcan1, &md2, ID2, BCH, MODE_OpenLoop);
+	InitMotorDriver(&hcan1, &md2, ID2, ACH, MODE_OpenLoop);
+	InitMotorDriver(&hcan1, &md3, ID2, BCH, MODE_NOT_USE_CH);
 	MotorDriveOpenLoop(&md2, 0);// can1 initialize
 	StartCAN(&hcan1);
 #endif
