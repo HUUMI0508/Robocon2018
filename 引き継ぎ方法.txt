@@ -1,0 +1,160 @@
+卍砲機能導入方法
+g
+
+1.フォルダXClib内に
+manzi_v2.c
+manzi_v2.h
+
+position.c
+position.h
+
+User_mura.c
+User_mura.h
+
+を入れる。
+
+2.GANMO.h内下部に以下の文を記載
+uint8_t rx_buf[256];
+
+->#include "User_mura.h"
+
+extern void InitGANMO(void);
+#endif
+
+このインクルードを上の方に記述しないように
+
+
+
+3.GANMO.c内各部に以下の文を記載
+//タイマー
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM13) {	//1ms
+#if 0/*** Odometry Calculate ***/
+	CalcMachinePosition(&hodometry);
+#endif
+#if 1/*** Encoder Calculate ***/
+		CalcENC(&henc1);
+		CalcENC(&henc2);
+		//CalcENC(&henc3);
+		//CalcENC(&henc4);
+#endif
+#if 1/*** Motor Control Calculate ***/
+
+->	ms1();
+#endif
+
+		return;
+	}
+	if (htim->Instance == TIM14) {	//50ms
+#if 1/*** Beep***/
+		BeepEx();
+#endif
+//		printf("%x\r\n", hDS.BUTTON.ButtonData);
+
+->		ms50();
+
+		return;
+	}
+}
+=====================================================================
+InitGANMO()内の一番最後、1msタイマーの起動手前に記述
+	LED_RED_LOW();
+	LED_GREEN_LOW();
+	LED_ORANGE_LOW();
+	//while (!hDS.BUTTON.START);
+	MCPS_HIGH(); // main circuit power supply enable
+	/*** 1ms timer Initialize ***/
+
+->	InitUSER();
+
+	HAL_TIM_Base_Start_IT(&htim13); // 1ms timer start and start measurement of encoder
+}
+
+ms1();
+ms50();
+InitUSER();
+（InitUSER();は、スタートボタン押されたら実行する処理内にいれていいかも）
+の三文が記載されたら完了
+
+4.エンコーダのイニシャライズ
+GANMO.c内部に書かれているEncoder Initializeのところに以下のように記述
+
+InitENC(&henc1, ENC1, 1, GEAR_RATIO_Gm_ACH, GEAR_RATIO_Ge_ACH, PPR_ACH, COUNTERCLOCKWISE);//Root
+InitENC(&henc2, ENC2, 1, GEAR_RATIO_Gm_BCH, GEAR_RATIO_Ge_BCH, PPR_BCH, COUNTERCLOCKWISE);//Tip
+
+
+5.モータードライバ設定のイニシャライズ
+GANMO.c内部に書かれているCAN Initializeのところのモータドライバの設定を次のように記述
+InitMotorDriver(&hcan1, &md1, ID1, ACH, MODE_OpenLoop);
+MotorDriveOpenLoop(&md1, 0);
+InitMotorDriver(&hcan1, &md2, ID2, BCH, MODE_OpenLoop);
+MotorDriveOpenLoop(&md2, 0);// can1 initialize
+
+//ここではID１とID２を使っているが、IDは任意に変えてください
+
+
+
+使用方法
+フラグが三種用意されています。
+CATCH
+READY
+THROW
+
+それぞれデフォルトは NACT 
+ACT にすることで動作する
+
+CATCH	先端のシリンダーを引き、シャトルコックをつかむ
+READY	アームをシャトルコック射出態勢に移行する
+THROW	シャトルコックを投げる
+
+それぞれのフラグは、その動作が終了次第フラグは NACT になる
+
+細かいフラグの流れは別途タイミングチャートを見てくだちい
+
+
+/*
+ * 操作方法
+ * 下でシャトルコックをつかむ
+ * 右で発射位置へ
+ * △でzone1のパラメータ
+ * 〇でzone2のパラメータ
+ * R3でzone3のパラメータをそれぞれセット
+ * 上で射出
+ * 以下ループ
+このボタン以外は触らない方がいい
+ */
+
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+射出関係のパラメータ調整
+
+#define ROOT_GOLDEN_SPEED		-575.		//deg/s//1151
+//#define ROOT_GOLDEN_DEG		-180.//deg
+//#define TIP_GOLDEN_DEG		-360.//deg
+
+#define ROOT_Z1_SPEED	-395.
+//#define ROOT_Z1_DEG		-180.
+//#define TIP_Z1_DEG	-360.
+
+#define ROOT_Z2_SPEED	-460.//ok
+//#define ROOT_Z2_DEG		-180.
+//#define TIP_Z2_DEG	-360.
+
+#define ROOT_RETURN_SPEED_DEG	180.		//deg/s//1151
+
+#define RELEASE_Z1 230.
+#define RELEASE_Z2 220.
+#define RELEASE_GOLDEN 190.
+
+
+ROOT_Z1_SPEED		zone1で投げる際のアーム速度
+ROOT_Z2_SPEED		zone2で投げる際のアーム速度
+ROOT_GOLDEN_SPEED	zone3で投げる際のアーム速度
+単位はdeg/s
+
+RELEASE_Z1		zone1でのシャトルコックを放す角度
+RELEASE_Z2		zone2でのシャトルコックを放す角度
+RELEASE_GOLDEN		zone3でのシャトルコックを放す角度
+角度の単位はdeg	値が大きくなるほど放すタイミングが遅くなる
+
+UKETORI_ROOT		受け取り状態、根本アーム角度
+UKETORI_TIP		受け取り状態、先端アーム角度
