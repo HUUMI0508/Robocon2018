@@ -230,22 +230,22 @@ void LINEAR_ORBIT(){
  * time	[ms]
  */
 void SET_REF_ROTATION(double REF_ROOT, double REF_TIP, double time){
-	rotation.Ref_Root_Angle = REF_ROOT;
-	rotation.Ref_Tip_Angle = REF_TIP;
+	rotation.Ref_Root_Angle = REF_ROOT;// + offset_root.Angle_Deg;
+	rotation.Ref_Tip_Angle = REF_TIP;// + offset_tip.Angle_Deg;
 	rotation.time = time;
-printf("set_ref_rotation\r\n");
+//printf("set_ref_rotation\r\n");
 /*
 	xprint(&huart4,"REF_ROOT %d.%d \r\n",gan(rotation.Ref_Root_Angle),dec(rotation.Ref_Root_Angle,100));
 	xprint(&huart4,"REF_TIP  %d.%d \r\n",gan(rotation.Ref_Tip_Angle),dec(rotation.Ref_Tip_Angle,100));
 	xprint(&huart4,"TIME     %d.%d \r\n",gan(rotation.time),dec(rotation.time,100));
 */
-	xprint(&huart4,"REF_ROOT %d.%d \r\n",gan(REF_ROOT),dec(REF_ROOT,100));
-	xprint(&huart4,"REF_TIP  %d.%d \r\n",gan(REF_TIP),dec(REF_TIP,100));
-	xprint(&huart4,"TIME     %d.%d \r\n",gan(time),dec(time,100));
+	//xprint(&huart4,"REF_ROOT %d.%d \r\n",gan(REF_ROOT),dec(REF_ROOT,100));
+	//xprint(&huart4,"REF_TIP  %d.%d \r\n",gan(REF_TIP),dec(REF_TIP,100));
+	//xprint(&huart4,"TIME     %d.%d \r\n",gan(time),dec(time,100));
 	rotation.Step_Root = (rotation.Ref_Root_Angle - rotation.Now_Root_Angle) / time;
 	rotation.Step_Tip = (rotation.Ref_Tip_Angle - rotation.Now_Tip_Angle) / time;
 
-	xprint(&huart4," %d.%d %d.%d\r\n",gan(rotation.Step_Root),dec(rotation.Step_Root,100),gan(rotation.Step_Tip),dec(rotation.Step_Tip,100));
+	//xprint(&huart4," %d.%d %d.%d\r\n",gan(rotation.Step_Root),dec(rotation.Step_Root,100),gan(rotation.Step_Tip),dec(rotation.Step_Tip,100));
 }
 void ROTATION_ORBIT(){
 	static long int count = 0;
@@ -260,7 +260,7 @@ void ROTATION_ORBIT(){
 			con2.Inref_P = rotation.Ref_Tip_Angle - rotation.Ref_Root_Angle;
 			pRoot.Now_Angle = con1.Inref_P / 360.;
 			pTip.Now_Angle = con2.Inref_P / 360.;
-			#if 1
+			#if 0
 				printf("debug rotation finish\r\n");
 				xprint(&huart4,"con1.Inref_P  %d.%d \r\n",gan(con1.Inref_P),dec(con1.Inref_P,100));
 				xprint(&huart4,"con2.Inref_P  %d.%d \r\n",gan(con2.Inref_P),dec(con2.Inref_P,100));
@@ -303,6 +303,19 @@ void CATCH_SEQUENCE(){
 		}
 		if((flg == ACT) && (ROTATION_MOVE == NACT)){
 			flg = NACT;
+			c_sequence = cMIDSTREAM2;
+		}
+		break;
+	case cMIDSTREAM2:
+		if(flg == NACT){
+			set_select = SET_ROTATION;
+			SET_NOW_POSITION();
+			SET_REF_ROTATION(c_position[1][0],c_position[1][1] , c_position[1][2]);
+			ROTATION_MOVE = ACT;
+			flg = ACT;
+		}
+		if((flg == ACT) && (ROTATION_MOVE == NACT)){
+			flg = NACT;
 			c_sequence = cEND;
 		}
 		break;
@@ -310,7 +323,7 @@ void CATCH_SEQUENCE(){
 		if(flg == NACT){
 			set_select = SET_ROTATION;
 			SET_NOW_POSITION();
-			SET_REF_ROTATION(c_position[1][0],c_position[1][1] , c_position[1][2]);
+			SET_REF_ROTATION(c_position[2][0],c_position[2][1] , c_position[2][2]);
 			ROTATION_MOVE = ACT;
 			flg = ACT;
 		}
@@ -332,39 +345,69 @@ void SET_STARTING_POINT(){
 		break;
 	case MOVE_ROOT:
 		PS_MODE = SPEED;
-		con1.Inref = 0.1;
-		con2.Inref = -0.1;
+		con1.Inref = 0.5;
+		con2.Inref = -0.5;
 		if(photo1 == GPIO_PIN_SET){
-			printf("photo1====PIN_SET\r\n");
+			//printf("photo1====PIN_SET\r\n");
+			con1.Inref = 0.;
+			con2.Inref = 0.;
+			origin = MOVE_TIP;
+		}
+		break;
+	case MOVE_TIP:
+		PS_MODE = SPEED;
+		//con1.Inref = 0.1;
+		con2.Inref = 0.5;
+		if(photo2 == GPIO_PIN_SET){
+			//printf("photo2====PIN_SET\r\n");
+			con1.Inref = 0.;
+			con2.Inref = 0.;
+			origin = REMOVE_ROOT;
+		}
+		break;
+	case REMOVE_ROOT:
+		PS_MODE = SPEED;
+		con1.Inref = -0.1;
+		con2.Inref = 0.1;
+		if(photo1 == GPIO_PIN_SET){
+			//printf("photo1====PIN_SET\r\n");
+			con1.Inref = 0.;
+			con2.Inref = 0.;
 			origin = SET_ROOT;
 		}
 		break;
 	case SET_ROOT:
+		PS_MODE = SPEED;
 		con1.Inref = 0.;
 		con2.Inref = 0.;
 		offset_root.Angle_Deg = henc3.qDeg;
 		offset_root.Angle_R = offset_root.Angle_Deg / 360.;
 		temporary_offset = 0;
-		origin = MOVE_TIP;
+		origin = REMOVE_TIP;
 		break;
-	case MOVE_TIP:
+	case REMOVE_TIP:
 		PS_MODE = SPEED;
 		//con1.Inref = 0.1;
-		con2.Inref = 0.1;
+		con2.Inref = -0.1;
 		if(photo2 == GPIO_PIN_SET){
-			printf("photo2====PIN_SET\r\n");
+			//printf("photo2====PIN_SET\r\n");
+			con1.Inref = 0.;
+			con2.Inref = 0.;
 			origin = SET_TIP;
 		}
 		break;
 	case SET_TIP:
+		PS_MODE = SPEED;
 		con1.Inref = 0.;
 		con2.Inref = 0.;
 		temporary_offset = henc3.qDeg;
 		offset_tip.Angle_Deg = henc4.qDeg - (temporary_offset - offset_root.Angle_Deg);
 		offset_tip.Angle_R = offset_tip.Angle_Deg / 360.;
 
-		PS_MODE = POSITION;
+		con1.Inref_P = 0;
+		con2.Inref_P = 0;
 		INIT_FINISH = ACT;
+		PS_MODE = POSITION;
 		origin = oSTOP;
 		break;
 	}

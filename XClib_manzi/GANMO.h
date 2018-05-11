@@ -16,6 +16,8 @@
 #include "SolenoidValveDriver.h"
 #include "xcan.h"
 #include "xuart.h"
+#include "LRF.h"
+#include "User.h"
 
 #define setPinStateHigh(__GPIO__, __GPIO_Pin__) (((__GPIO__)->BSRR) = (__GPIO_Pin__))
 #define setPinStateLow(__GPIO__, __GPIO_Pin__)  (((__GPIO__)->BSRR) = (uint32_t)(__GPIO_Pin__) << 16U)
@@ -67,11 +69,9 @@
 // LIMIT BL
 #define LIMIT_BL()			getPinState(LIMIT_BL_GPIO_Port, LIMIT_BL_Pin)
 
-typedef enum {
-	ACT = 0,
-	NACT
-} FLG;
-//FLG LINEAR_MOVE;
+
+#define INPUT_A3()			getPinState(A3_GPIO_Port, A3_Pin)
+
 
 enum {
 	FALSE = 0,
@@ -82,6 +82,7 @@ enum {
 	LOW = 0,
 	HIGH
 };
+
 #if 0
 void PinModeChange(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t mode) {
 	GPIO_InitTypeDef GPIO_InitStruct;
@@ -101,6 +102,9 @@ void PinModeChange(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, uint8_t mode) {
 
 uint8_t rx_buf[256];
 
-#include "User_mura.h"
+#ifndef WHEEL_ONLY
+//#include "User_mura.h"
+#endif
+
 extern void InitGANMO(void);
 #endif

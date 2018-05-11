@@ -12,7 +12,7 @@
 
 #define ROOT_ARM 0.295
 #define TIP_ARM 0.375
-#define P_GAIN 2.
+#define P_GAIN 10.
 
 typedef struct{
 	double Inref;
@@ -84,6 +84,7 @@ MODE PS_MODE;
 typedef enum{
 	cSTOP,
 	cMIDSTREAM,
+	cMIDSTREAM2,
 	cEND
 }C_SEQUENCE;
 C_SEQUENCE c_sequence;
@@ -92,8 +93,10 @@ C_SEQUENCE c_sequence2;
 typedef enum{
 	oSTOP,
 	MOVE_ROOT,
-	SET_ROOT,
 	MOVE_TIP,
+	REMOVE_ROOT,
+	SET_ROOT,
+	REMOVE_TIP,
 	SET_TIP
 }ORIGIN;
 ORIGIN origin;

@@ -47,26 +47,30 @@
  * 上で射出
  * 以下ループ
  */
-#define ROOT_GOLDEN_SPEED		-565.//-575.//-575.		//deg/s//1151
+//速度は絶対値、大きいとやや下がる
+#define ROOT_GOLDEN_SPEED	-430.//-445.//
 #define ROOT_GOLDEN_DEG		-180.//deg
 #define TIP_GOLDEN_DEG		-360.//deg
 
-#define ROOT_Z1_SPEED	-395.//-390.//-400.//ok
+#define ROOT_Z1_SPEED	-440//-395.//-390.//-400.//ok
 #define ROOT_Z1_DEG		-180.
 #define TIP_Z1_DEG	-360.
 
-#define ROOT_Z2_SPEED	-460.//ok
+#define ROOT_Z2_SPEED	-430.//-490.//ok
 #define ROOT_Z2_DEG		-180.
 #define TIP_Z2_DEG	-360.
 
-#define ROOT_RETURN_SPEED_DEG	180.		//deg/s//1151
+#define ROOT_RETURN_SPEED_DEG	360.		//deg/s//1151
 
-#define RELEASE_Z1 250.
-#define RELEASE_Z2 240.
-#define RELEASE_GOLDEN 228.
 
-#define UKETORI_ROOT 	160.
-#define UKETORI_TIP		60.
+//リリース角、大きいと下がる
+#define RELEASE_Z1 240.0//236.5
+#define RELEASE_Z2 238.0//234.5
+#define RELEASE_GOLDEN 230.5//228.
+
+//受け取り角、大きいと上がる
+#define UKETORI_ROOT 	154.
+#define UKETORI_TIP		78.
 
 
 double RELEASE_ANGLE_DEG;
@@ -154,6 +158,9 @@ typedef struct{
 	FLG ZONE1;
 	FLG ZONE2;
 	FLG ZONE3;
+
+	FLG SELECT;
+	FLG START;
 }COMMAND;
 COMMAND command;
 FLG Fire;
@@ -175,4 +182,7 @@ extern void INPUT();
 extern void PARM_SET(mParm *c,double Limit_S, double Last_A);
 extern void SPEED_SET(double Root_Speed, double Root_Angle_Deg, double Tip_Angle_Deg);
 extern void FIRE_FLAG_M();
+
+extern void EDFSetOut(double pow);
+extern void EDFInit(void);
 #endif /* MANZI_V2_H_ */

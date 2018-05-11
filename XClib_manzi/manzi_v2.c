@@ -66,8 +66,10 @@ void MANZI_INIT(){
 	command.LEFT = NACT;
 	command.RIGHT = NACT;
 	command.DOWN = NACT;
+	command.START = NACT;
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_RESET);
+//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_RESET);
 
 }
 
@@ -118,7 +120,7 @@ void MOTOR_CONTROLL(){
 
 		}
 		if((TIP_D == NACT) && (ROOT_D == NACT)){
-			LED_ORANGE_T();
+			//LED_ORANGE_T();
 			/*
 			protect.Lag_Count = 0;//
 			con1.P_Gain = 0;//
@@ -177,7 +179,7 @@ void SPEED_DOWN(){
 			}
 		}
 		if((TIP_DD == NACT) && (ROOT_DD == NACT)){
-			LED_ORANGE_T();
+		//	LED_ORANGE_T();
 			protect.Lag_Count = 0;//
 			con1.P_Gain = 0;//
 			con2.P_Gain = 0;//
@@ -198,7 +200,7 @@ void INPUT(){
 	//SW2 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_14);//E9
 	//射出
 	if(hDS.BUTTON.CROSS)command.CROSS = ACT;
-#if 1
+#ifndef PRESENT
 	//else command.CROSS = NACT;
 	if(hDS.BUTTON.SQUARE)command.SQUARE = ACT;
 	//else command.SQUARE = NACT;
@@ -208,7 +210,7 @@ void INPUT(){
 	if(hDS.BUTTON.CIRCLE)command.ZONE2 = ACT;
 	//else command.CIRCLE = NACT;
 
-	if(hDS.BUTTON.L1)command.L1 = ACT;
+	//if(hDS.BUTTON.L1)command.L1 = ACT;
 	//else command.L1 = NACT;
 	if(hDS.BUTTON.L2)command.L2 = ACT;
 	//else command.L2 = NACT;
@@ -228,129 +230,16 @@ void INPUT(){
 	//else command.RIGHT = NACT;
 	if(hDS.BUTTON.DOWN)command.DOWN = ACT;
 	//else command.DOWN = NACT;
+	if(hDS.BUTTON.SELECT)command.SELECT = ACT;
+	if(hDS.BUTTON.START)command.START = ACT;
+	else command.START = NACT;
 #endif
 
 
-#if 0
-		if(hDS.BUTTON.CIRCLE){//GOLDEN
-			RELEASE_ANGLE_DEG = 225.;
-			RELEASE_ANGLE = (RELEASE_ANGLE_DEG / 360.);
-
-			SPEED_SET(ROOT_GOLDEN_SPEED, ROOT_GOLDEN_DEG, TIP_GOLDEN_DEG);
-				if(F_Button == NACT){
-					//HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_RESET);
-					ROOT_D = ACT;
-					TIP_D = ACT;
-					PS_MODE = SPEED;///
-					Fire = ACT;
-					F_Button = ACT;
-				}
-		}
-		//戻り
-		else if(hDS.BUTTON.SQUARE){//RETURN
-			LED_GREEN_T();
-			//Button = SQUARE;
-
-			RELEASE_ANGLE_DEG = 9999.;
-			RELEASE_ANGLE = (RELEASE_ANGLE_DEG / 360.);
-
-			SPEED_SET(ROOT_RETURN_SPEED_DEG, 0, 0);
-				if(F_Button == NACT){
-					ROOT_D = ACT;
-					TIP_D = ACT;
-					PS_MODE = SPEED;///
-					Fire = ACT;
-					F_Button = ACT;
-				}
-		}
-		//座標B
-		else if(hDS.BUTTON.TRIANGLE){//ZONE1
-			LED_GREEN_T();
-
-			RELEASE_ANGLE_DEG = 225.;
-			RELEASE_ANGLE = (RELEASE_ANGLE_DEG / 360.);
-
-			SPEED_SET(ROOT_Z1_SPEED, ROOT_Z1_DEG, TIP_Z1_DEG );
-				if(F_Button == NACT){
-					ROOT_D = ACT;
-					TIP_D = ACT;
-					PS_MODE = SPEED;///
-					Fire = ACT;
-					F_Button = ACT;
-				}
-		}
-		else if(hDS.BUTTON.CROSS){//ZONE2
-			LED_GREEN_T();
-
-			RELEASE_ANGLE_DEG = 225.;
-			RELEASE_ANGLE = (RELEASE_ANGLE_DEG / 360.);
-
-			SPEED_SET(ROOT_Z2_SPEED, ROOT_Z2_DEG, TIP_Z2_DEG);
-				if(F_Button == NACT){
-					ROOT_D = ACT;
-					TIP_D = ACT;
-					PS_MODE = SPEED;///
-					Fire = ACT;
-					F_Button = ACT;
-				}
-		}
-		else if(hDS.BUTTON.L1){
-			if(F_Button == NACT){
-				HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_0);//電磁弁3 OFF
-				F_Button = ACT;
-			}
-		}
-
-		else if(hDS.BUTTON.L2){
-			if(F_Button == NACT){
-				HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_1);//電磁弁3 OFF
-				F_Button = ACT;
-			}
-		}
-
-		else if(hDS.BUTTON.R1){//受け取り位置へ移動
-			if(F_Button == NACT){
-				double data[2][3] = {{0.,150.,1000.},
-									 {160.,40.,1000.}};
-				for(int i = 0; i <= 1; i++){
-					for(int j = 0; j <= 2; j++){
-						c_position[i][j] = data[i][j];
-					}
-				}
-				c_sequence = cMIDSTREAM;
-				F_Button = ACT;
-			}
-		}
-		else if(hDS.BUTTON.R2){//初期位置へ戻る
-			if(F_Button == NACT){
-				double data[2][3] = {{0.,150.,1000.},
-									 {0.,0.,1000.}};
-				for(int i = 0; i <= 1; i++){
-					for(int j = 0; j <= 2; j++){
-						c_position[i][j] = data[i][j];
-					}
-				}
-				c_sequence = cMIDSTREAM;
-				F_Button = ACT;
-			}
-			/*
-			if(F_Button == NACT){
-				set_select = SET_ROTATION;
-				SET_NOW_POSITION();
-				SET_REF_ROTATION(160, 40, 1000.);
-				ROTATION_MOVE = ACT;
-				F_Button = ACT;
-			}
-			*/
-		}
-
-		else{
-			if(F_Button == ACT) F_Button = NACT;
-		}
-#elif 1
+#if 1
 		if(command.CROSS == ACT){//ZONE2
-			//MotorDriveOpenLoop(&md1, 0);//Root
-			//MotorDriveOpenLoop(&md2, 0);//Tip
+			MotorDriveOpenLoop(&md1, 0);//Root
+			MotorDriveOpenLoop(&md2, 0);//Tip
 			MCPS_LOW();
 			command.CROSS = NACT;
 		}
@@ -369,7 +258,7 @@ void INPUT(){
 			RELEASE_ANGLE_DEG = 9999.;
 			RELEASE_ANGLE = (RELEASE_ANGLE_DEG / 360.);
 
-			SPEED_SET(ROOT_RETURN_SPEED_DEG, 0, 0);
+			SPEED_SET(ROOT_RETURN_SPEED_DEG, -45, -60);
 
 			FIRE_FLAG_M();
 
@@ -396,11 +285,11 @@ void INPUT(){
 			command.CIRCLE = NACT;
 		}
 
-
+/*
 		if(command.L1 == ACT){
-			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
 			command.L1 = NACT;
 		}
+	*/
 		if(command.L2== ACT){
 			HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_0);//電磁弁3 OFF
 			command.L2 = NACT;
@@ -411,20 +300,25 @@ void INPUT(){
 			command.L3 = NACT;
 		}
 		if(command.R1 == ACT){//受け取り位置へ移動
-			double data[2][3] = {{0.,165.,1000.},
-								 {UKETORI_ROOT,UKETORI_TIP,1000.}};
-			for(int i = 0; i <= 1; i++){
+
+			double data[3][3] = {{0.,170.,500.},
+								 {80.,110.,250.},
+								 {UKETORI_ROOT,UKETORI_TIP,250.}};
+			for(int i = 0; i <= 2; i++){
 				for(int j = 0; j <= 2; j++){
 					c_position[i][j] = data[i][j];
 				}
 			}
 			c_sequence = cMIDSTREAM;
 			command.R1 = NACT;
+
 		}
 		if(command.R2 == ACT){//初期位置へ戻る
-			double data[2][3] = {{0.,150.,1000.},
-								 {0.,0.,1000.}};
-			for(int i = 0; i <= 1; i++){
+			//90,180//270,-180
+			double data[3][3] = {{70.,230.,800.},
+								 {0.,180.,500.},
+								 {0.,0.,800.}};
+			for(int i = 0; i <= 2; i++){
 				for(int j = 0; j <= 2; j++){
 					c_position[i][j] = data[i][j];
 				}
@@ -439,14 +333,7 @@ void INPUT(){
 			command.UP = NACT;
 		}
 		if(command.LEFT == ACT){
-			LED_ORANGE_T();
-			protect.Lag_Count = 0;
-			con1.P_Gain = 0;
-			con2.P_Gain = 0;
-			THROW = NACT;
-			RELOAD = NACT;
-			PS_MODE = STOP;
-			Fire = NACT;
+			ARM_INIT = ACT;
 			command.LEFT = NACT;
 		}
 		if(command.RIGHT == ACT){
@@ -470,6 +357,15 @@ void INPUT(){
 			throw_zone = Z3;
 			command.ZONE3 = NACT;
 		}
+		if(command.SELECT == ACT){
+			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET);
+			command.SELECT = NACT;
+		}
+		if(command.START == ACT){
+			//EDFSetOut(0.5);
+			JACK = NACT;
+		}
+
 #endif
 }
 

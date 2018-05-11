@@ -2,27 +2,51 @@
 #include "xuart.h"
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	static int counter = 1;
 	if (htim->Instance == TIM13) {	//1ms
-#if 0/*** Odometry Calculate ***/
-	CalcMachinePosition(&hodometry);
-#endif
+		lrf_timer ++;
+		if(general_timer_flg==ACT)general_timer++;
+		else general_timer=0;
 #if 1/*** Encoder Calculate ***/
+		CalcENC(&henc1);
+		CalcENC(&henc2);
+
+#ifndef WHEEL_ONLY
 		CalcENC(&henc3);
 		CalcENC(&henc4);
-		//CalcENC(&henc3);
-		//CalcENC(&henc4);
+#endif
+
 #endif
 #if 1/*** Motor Control Calculate ***/
+
+#ifndef WHEEL_ONLY
 		ms1();
+#endif
+
+#endif
+#if 1/*** Odometry Calculate ***/
+	//CalcMachinePosition(&hodometry);
+	if(counter >= getOdometryCycTime(&odometry_system)){
+		updateMachinePosition(&odometry_system, henc1.qDeg, henc2.qDeg, hgyro.qDeg);
+		//else lrf_x = 0;
+		counter = 1;
+	}
+	else counter ++;
+	if(cr_timer_flg == ACT)ms_timer ++;
+	else ms_timer = 0;
 #endif
 		return;
 	}
+	if (htim->Instance == TIM11) {	//50ms
+		return;
+	}
 	if (htim->Instance == TIM14) {	//50ms
-#if 1/*** Beep***/
+		/*** Beep***/
 		BeepEx();
-#endif
-//		printf("%x\r\n", hDS.BUTTON.ButtonData);
+#ifndef WHEEL_ONLY
 		ms50();
+#endif
+
 		return;
 	}
 }
@@ -40,7 +64,7 @@ void InitGANMO(void) {
 	printf("System Start...\r\n");	// printf check
 	HAL_TIM_Base_Start_IT(&htim14); // 50ms timer start and beep func. start
 	BeepOS(BEEP_SYSTEM_INIT_START);		// Initialize start
-	while (BeepOCF() > 0) {
+	while (BeepOCF()) {
 		LED_ORANGE_T();
 		LED_RED_T();
 		LED_GREEN_T();
@@ -59,22 +83,49 @@ void InitGANMO(void) {
 	}
 #endif
 #endif
-#if 0/*** Omni Initialize ***/
-	InitOmni(OMNI_4_F, 0.55, 0.1);				// omni initialize
+#if 1/*** Omni Initialize ***/
+	mx = 0.;								//machine position x
+	my = 0.;								//machine position y
+	mtheta = 0.; 						//machine degree
+	vx_ref = 0.;							//reference of velocity x
+	vy_ref = 0.;							//reference of velocity y
+	omega_ref = 0.;						//reference of angular frequency
+	px_ref = 0.;							//reference of position x
+	py_ref = 0.;							//reference of position y
+	theta_ref = 0.;						//reference of degree
+	for(int i=0;i<10;i++){
+		ff_out[i]=0;
+		fb_out[i]=0;
+	}
+	OmniSetCtrlParamsApprox(&omni_system, 0.1, 1.0);
+	OmniSetMachineParams(&omni_system, N, R_W, R_M);
+	OmniSetRef(&omni_system, px_ref, py_ref, theta_ref);
 #endif
-#if 0/*** Gyro Sensor Initialize ***/
+#if 1/*** Gyro Sensor Initialize ***/
 	InitGyro(&huart8);			// gyro initialize... There is a 1 second delay in function
 	GYRO_nRST(1);// gyro enable
 #endif
-#if 0/*** Odometry Initialize ***/
-	InitOdometry (&hodometry, &henc1, &henc2, &hgyro, 1, 0.048);
+#if 1/*** Odometry Initialize ***/
+	for(int i=0;i<2;i++){
+		odometry_position[i] = 0;
+		odometry_speed[i] = 0;
+	}
+	setOdometryAxis(&odometry_system, BIAXIAL);
+	setOdometryParams(&odometry_system, D_W, ODO_X_X, ODO_X_Y, ODO_Y_X, ODO_Y_Y);
+	setOdometryCycTime(&odometry_system, ODO_CYC_TIME);
+	lrf_x = 0;
 #endif
 #if 1/*** Encoder Initialize ***/
+	InitENC(&henc1, ODO_ENC_X, ENC_CYC_TIME, 1, GEAR_RATIO, E_PPR, CLOCKWISE);				// encoder initialize
+	InitENC(&henc2, ODO_ENC_Y, ENC_CYC_TIME, 1, GEAR_RATIO, E_PPR, COUNTERCLOCKWISE);				// encoder initialize
+	//InitENC(&henc3, ENC3, 1, 1 / 26.0, 1, 100, CLOCKWISE);				// encoder initialize
+	//InitENC(&henc4, ENC4, 1, 1 / 26.0, 1, 100, CLOCKWISE);				// encoder initialize
+
+#ifndef WHEEL_ONLY
 	InitENC(&henc3, ENC3, 1, GEAR_RATIO_Gm_ACH, GEAR_RATIO_Ge_ACH, PPR_ACH, COUNTERCLOCKWISE);//Root
-//	InitENC(&henc1, ENC1, 1, 1/1, 1, 100, CLOCKWISE);//Root
 	InitENC(&henc4, ENC4, 1, GEAR_RATIO_Gm_BCH, GEAR_RATIO_Ge_BCH, PPR_BCH, COUNTERCLOCKWISE);//Tip
-	//InitENC(&henc3, ENC3, 1, 14 / 46.0, 1, 100, CLOCKWISE);				// encoder initialize
-//	InitENC(&henc4, ENC4, 1, 1 / 26.0, 1, 100, CLOCKWISE);				// encoder initialize
+#endif
+
 #endif
 #if 0/*** Motor Control Initialize in GANMO***/
 	InitMCTRL(&hmtr1, &henc2, 0.5);
@@ -84,15 +135,26 @@ void InitGANMO(void) {
 #if 1
 	/*** CAN Initialize ***/
 	InitCAN(&hcan1);				// can1 initialize
+	InitMotorDriver(&hcan1, &omni_motor[2], ID7, BCH, MODE_ClosedLoop);
+	MotorDriveClosedLoop(&omni_motor[0], 0);
+	InitMotorDriver(&hcan1, &omni_motor[1], ID8, ACH, MODE_ClosedLoop);
+	MotorDriveClosedLoop(&omni_motor[1], 0);
+	InitMotorDriver(&hcan1, &omni_motor[0], ID9, ACH, MODE_ClosedLoop);
+	MotorDriveClosedLoop(&omni_motor[2], 0);
+	InitMotorDriver(&hcan1, &omni_motor[3], ID9, BCH, MODE_ClosedLoop);
+	MotorDriveClosedLoop(&omni_motor[3], 0);
+
+#ifndef WHEEL_ONLY
 	InitMotorDriver(&hcan1, &md1, ID1, ACH, MODE_OpenLoop);
 	MotorDriveOpenLoop(&md1, 0);
-	InitMotorDriver(&hcan1, &md2, ID2, ACH, MODE_OpenLoop);
-	InitMotorDriver(&hcan1, &md3, ID2, BCH, MODE_NOT_USE_CH);
+	InitMotorDriver(&hcan1, &md2, ID1, BCH, MODE_OpenLoop);
 	MotorDriveOpenLoop(&md2, 0);// can1 initialize
+#endif
+
 	StartCAN(&hcan1);
 #endif
 	HAL_Delay(500);
-	/*** Initialize finished ***/
+	/*** Initialize finished***/
 	BeepOS(BEEP_SYSTEM_INIT_FINISH);		// Initialize finished
 	uint8_t led_pattern = 0;
 	while (BeepOCF()) {
@@ -109,14 +171,17 @@ void InitGANMO(void) {
 		}
 		HAL_Delay(50);
 	}
-
 	LED_RED_LOW();
 	LED_GREEN_LOW();
 	LED_ORANGE_LOW();
 	//while (!hDS.BUTTON.START);
 	MCPS_HIGH(); // main circuit power supply enable
 	/*** 1ms timer Initialize ***/
-	InitUSER();
+	lrf_timer = 0;
+	general_timer_flg=NACT;
+	general_timer=0;
+
+	HAL_TIM_Base_Start_IT(&htim11); // 50ms timer start and beep func. start
 	HAL_TIM_Base_Start_IT(&htim13); // 1ms timer start and start measurement of encoder
 }
 
@@ -161,7 +226,7 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-#if 0/*** Gyro Calculate ***/
+#if 1/*** Gyro Calculate ***/
 	if (huart->Instance == UART8) {
 		CalcGyro();
 		return;
@@ -176,7 +241,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
-	uint8_t buf = 0;
 	/*** DualShock ***/
 	if (huart->Instance == UART5) {
 		if (huart->ErrorCode & HAL_UART_ERROR_ORE) {
@@ -202,7 +266,6 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 		ReStartDS();
 		return;
 	}
-#if 0
 	/*** Gyro ***/
 	if (huart->Instance == UART8) {
 		if (huart->ErrorCode == HAL_UART_ERROR_ORE) {
@@ -211,6 +274,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 		huart->Instance->RDR;
 		return;
 	}
+#if 0
 	if (huart->Instance == UART4) {
 		if (huart->ErrorCode == HAL_UART_ERROR_ORE) {
 			huart->Instance->ISR &= ~0x0020;

@@ -31,7 +31,10 @@
 //#include "manzi.c"
 #include "position.h"
 
+#define PRESENT
+
 /*** User Global***/
+tMD omni_motor[4];
 tMD md1;
 tMD md2;
 tMD md3;
@@ -113,7 +116,7 @@ tMD md4;
 // BCH
 #define GEAR_RATIO_Gm_BCH	1/39.0
 #define GEAR_RATIO_Ge_BCH	1
-#define PPR_BCH				100
+#define PPR_BCH				500
 #define T_CONSTRPV_BCH		35
 #define RPV_BCH				317
 #define OMEGA_BCH			20
@@ -145,9 +148,11 @@ typedef enum{
 }THROW_ZONE;
 THROW_ZONE throw_zone;
 
+FLG ARM_INIT;
 FLG CATCH;
 FLG READY;
 FLG THROW;
+FLG JACK;
 
 FLG RELOAD;
 FLG LAG;
@@ -157,6 +162,6 @@ extern void ms1(void);
 extern void ms50(void);
 extern void PAISEN_SEQUENCE(void);
 
-double c_position[2][3];
+double c_position[3][3];
 
 #endif /* USER_MURA_H_ */

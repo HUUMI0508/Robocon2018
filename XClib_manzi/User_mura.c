@@ -22,11 +22,13 @@ void InitUSER(void){
 	INIT_FINISH = NACT;
 	//CATCH_POSITION_FINISH = NACT;
 	throw_zone = Z1;
+	ARM_INIT = NACT;
 	CATCH = NACT;
 	READY = NACT;
 	THROW = NACT;
 	RELOAD = NACT;
 	paisen = START;
+	JACK = NACT;
 
 	MANZI_INIT();
 	POSITION_INIT();
@@ -56,6 +58,20 @@ void ms1(void){
 void ms50(void){
 
 	INPUT();
+	if(JACK == ACT){
+		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_SET);
+	}
+	else if(JACK == NACT){
+		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_RESET);
+#ifndef PRESENT
+
+		if((paisen == FIRE) | (paisen == END)){
+			EDFSetOut(0.5);
+		}
+		else EDFSetOut(0.0);
+
+#endif
+	}
 	static int count = 0;
 	count++;
 	if(count >= 6){
@@ -69,10 +85,6 @@ void ms50(void){
 		printf("%d\r\n",c_sequence);
 		printf("%d\r\n",paisen);
 		printf("%d\r\n",READY);
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((dRoot.Accel_Time)),dec((dRoot.Accel_Time),100),gan((dRoot.Goal_Angle)),dec((dRoot.Goal_Angle),100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((dRoot.Move_Angle)),dec((dRoot.Move_Angle),100),gan((dRoot.Speed_Delta)),dec((dRoot.Speed_Delta),100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((dTip.Accel_Time)),dec((dTip.Accel_Time),100),gan((dTip.Goal_Angle)),dec((dTip.Goal_Angle),100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((dTip.Move_Angle)),dec((dTip.Move_Angle),100),gan((dTip.Speed_Delta)),dec((dTip.Speed_Delta),100));
 		xprint(&huart4," %d.%d %d.%d\r\n",gan((hmtr1.qDuty)),dec((hmtr1.qDuty),100),gan((hmtr2.qDuty)),dec((hmtr2.qDuty),100));
 		xprint(&huart4," %d.%d %d.%d\r\n",gan((pRoot.Speed * 360 )),dec((pRoot.Speed * 360),100),gan((pTip.Speed * 360)),dec((pTip.Speed * 360),100));
 		xprint(&huart4," %d.%d %d.%d\r\n",gan((pRoot.Angle * 360 )),dec((pRoot.Angle * 360),100),gan((pTip.Angle * 360)),dec((pTip.Angle * 360),100));
@@ -104,24 +116,25 @@ void ms50(void){
 }
 
 void PAISEN_SEQUENCE(){
+//	if(throw_zone == Z3)	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_SET);
 	switch(paisen){
 	case START:
 		break;
 	case INIT://イニシャライズ
-		if(INIT_FINISH == ACT){
-			paisen = CATCH_POSITION;
-		}
+		if(INIT_FINISH == ACT)	paisen = CATCH_POSITION;
 		break;
 	case CATCH_POSITION:
 		INIT_FINISH = NACT;
-		if(RELOAD == NACT){
-			command.R1 = ACT;//受け取り位置へ
-			paisen = CATCH_SHUTLE;
+		if(ARM_INIT == ACT){
+			if(RELOAD == NACT){
+				command.R1 = ACT;//受け取り位置へ
+				paisen = CATCH_SHUTLE;
+			}
 		}
 		break;
 	case CATCH_SHUTLE:
 		if(CATCH == ACT){
-			command.L1 = ACT;
+			command.SELECT = ACT;
 			paisen = THROW_READY;
 		}
 		break;
@@ -129,12 +142,14 @@ void PAISEN_SEQUENCE(){
 		CATCH = NACT;
 		if(READY == ACT){
 			command.R2 = ACT;
+			JACK = ACT;
 			paisen = FIRE;
 		}
 		break;
 	case FIRE:
 		if(READY == NACT){
 			if(THROW == ACT){
+				//JACK = NACT;
 				switch(throw_zone){
 				case Z1:
 					command.TRIANGLE = ACT;
@@ -153,9 +168,13 @@ void PAISEN_SEQUENCE(){
 	case END:
 		if(THROW == NACT){
 			if(LAG == NACT){
-				RELOAD = ACT;
+				//EDFSetOut(0.0);
+				RELOAD = ACT;//act
 				command.SQUARE = ACT;
 				paisen = CATCH_POSITION;
+			//	RELOAD = NACT;//act
+			//	origin = MOVE_ROOT;
+			//	paisen = INIT;
 			}
 		}
 		break;
