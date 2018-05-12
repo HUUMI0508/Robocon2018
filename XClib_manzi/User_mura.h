@@ -31,7 +31,7 @@
 //#include "manzi.c"
 #include "position.h"
 
-#define PRESENT
+//#define PRESENT
 
 /*** User Global***/
 tMD omni_motor[4];
@@ -162,6 +162,6 @@ extern void ms1(void);
 extern void ms50(void);
 extern void PAISEN_SEQUENCE(void);
 
-double c_position[3][3];
+double c_position[2][3];
 
 #endif /* USER_MURA_H_ */

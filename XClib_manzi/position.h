@@ -20,6 +20,7 @@ typedef struct{
 	double P_Error;
 	double P_Gain;
 	double Limit;
+	int Rotation;
 }CONTROLL;
 CONTROLL con1;
 CONTROLL con2;

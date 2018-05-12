@@ -89,7 +89,7 @@ void MOTOR_CONTROLL(){
 
 			con1.Inref = pRoot.Speed;
 
-			if(fabs(pRoot.Angle - pRoot.Now_Angle) >= fabs(pRoot.Move_Angle)){
+			if(fabs(pRoot.Angle - pRoot.Now_Angle) >= fabs(pRoot.Move_Angle + (con1.Rotation * -1.0))){
 				//pRoot.Now_Angle = pRoot.Goal_Angle;
 				//con1.Inref_P = (pRoot.Now_Angle * 360.);
 				//con1.Inref = 0;
@@ -106,10 +106,10 @@ void MOTOR_CONTROLL(){
 			con2.Inref = (pTip.Speed - pRoot.Speed);
 
 			//if(henc3.qDeg >= TIP_LAST_ANGLE_DEG)HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);
-			if(fabs((pTip.Angle + pRoot.Angle) - pTip.Now_Angle) >= fabs(RELEASE_ANGLE)){
+			if(fabs((pTip.Angle + pRoot.Angle) - pTip.Now_Angle) >= fabs(RELEASE_ANGLE + (con2.Rotation * -2.0))){
 				HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);
 			}
-			if(fabs((pTip.Angle + pRoot.Angle) - pTip.Now_Angle) >= fabs(pTip.Move_Angle)){
+			if(fabs((pTip.Angle + pRoot.Angle) - pTip.Now_Angle) >= fabs(pTip.Move_Angle + (con2.Rotation * -2.0))){
 				//pTip.Now_Angle = pTip.Goal_Angle;
 				//con2.Inref_P = ((pTip.Now_Angle - pRoot.Goal_Angle) * 360);
 				//con2.Inref = 0;
@@ -152,9 +152,9 @@ void SPEED_DOWN(){
 
 			con1.Inref = pRoot.Speed;
 
-			if(fabs(pRoot.Angle - pRoot.Now_Angle) >= fabs(dRoot.Move_Angle)){
+			if(fabs(pRoot.Angle - pRoot.Now_Angle) >= fabs(dRoot.Move_Angle + (con1.Rotation * -1.0))){
 				pRoot.Now_Angle = dRoot.Goal_Angle;
-				con1.Inref_P = (pRoot.Now_Angle * 360.);
+				con1.Inref_P = (pRoot.Now_Angle * 360.) + (con1.Rotation * -360.0);
 				con1.Inref = 0;
 				pRoot.Speed = 0;
 				pRoot.Speed_Old = 0;
@@ -169,9 +169,9 @@ void SPEED_DOWN(){
 			con2.Inref = (pTip.Speed - pRoot.Speed);
 
 			//if(henc3.qDeg >= TIP_LAST_ANGLE_DEG)HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET);
-			if(fabs((pTip.Angle + pRoot.Angle) - pTip.Now_Angle) >= fabs(dTip.Move_Angle)){
+			if(fabs((pTip.Angle + pRoot.Angle) - pTip.Now_Angle) >= fabs(dTip.Move_Angle + (con2.Rotation * -2.0))){
 				pTip.Now_Angle = dTip.Goal_Angle;
-				con2.Inref_P = ((pTip.Now_Angle - dRoot.Goal_Angle) * 360);
+				con2.Inref_P = ((pTip.Now_Angle - dRoot.Goal_Angle) * 360) + (con2.Rotation * -360.0);
 				con2.Inref = 0;
 				pTip.Speed = 0;
 				pTip.Speed_Old = 0;
@@ -188,6 +188,8 @@ void SPEED_DOWN(){
 			PS_MODE = STOP;//
 			Fire = NACT;
 			Down = NACT;
+			con1.Rotation++;
+			con2.Rotation++;
 		}
 	}
 

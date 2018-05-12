@@ -13,6 +13,7 @@ void POSITION_INIT(){
 	con1.Inref_P = 0.0;
 	con1.Limit = 0.8;
 	con1.P_Error = 0.0;
+	con1.Rotation = 0;
 	//τ * ωn^2
 	//con1.P_Gain = T_CONSTRPV_ACH * OMEGA_ACH * OMEGA_ACH;//126.0;
 	con1.P_Gain = P_GAIN;
@@ -21,6 +22,7 @@ void POSITION_INIT(){
 	con2.Inref_P = 0.0;
 	con2.Limit = 0.8;
 	con2.P_Error = 0.0;
+	con2.Rotation = 0.0;
 	//con2.P_Gain = T_CONSTRPV_BCH * OMEGA_BCH * OMEGA_BCH;//126.0;
 	con2.P_Gain = P_GAIN;
 
@@ -98,6 +100,29 @@ void POSITION_CONTROLL(){
 
 	//Position_Controll
 	if(PS_MODE == POSITION){
+		/*
+		con1.Inref_P *= 1000.0;
+		con1.Inref_P = ((int)con1.Inref_P % (360 * 1000));
+		con1.Inref_P /= 1000.0;
+		if(con1.Inref_P < 0)con1.Inref_P = 360 + con1.Inref_P;
+
+		henc3.qDeg_m = henc3.qDeg;
+		henc3.qDeg_m = henc3.qDeg_m * 1000.0;
+		henc3.qDeg_m = ((int)henc3.qDeg_m % (360 * 1000));
+		henc3.qDeg_m = henc3.qDeg_m / 1000.0;
+		if(henc3.qDeg_m < 0) henc3.qDeg_m = 360 + henc3.qDeg_m;
+
+		con2.Inref_P *= 1000.0;
+		con2.Inref_P = ((int)con2.Inref_P % (360 * 1000));
+		con2.Inref_P /= 1000.0;
+		if(con2.Inref_P < 0)con2.Inref_P = 360 + con2.Inref_P;
+
+		henc4.qDeg_m = henc4.qDeg;
+		henc4.qDeg_m = henc4.qDeg_m * 1000.0;
+		henc4.qDeg_m = ((int)henc4.qDeg_m % (360 * 1000));
+		henc4.qDeg_m = henc4.qDeg_m / 1000.0;
+		if(henc4.qDeg_m < 0) henc4.qDeg_m = 360 + henc4.qDeg_m;
+*/
 		con1.P_Error = ((con1.Inref_P + offset_root.Angle_Deg) - (henc3.qDeg)) / 360;//目標との差分
 		con1.Inref = con1.P_Error * con1.P_Gain;//差分にゲインをかけて速度目標値にする
 
@@ -230,15 +255,15 @@ void LINEAR_ORBIT(){
  * time	[ms]
  */
 void SET_REF_ROTATION(double REF_ROOT, double REF_TIP, double time){
-	rotation.Ref_Root_Angle = REF_ROOT;// + offset_root.Angle_Deg;
-	rotation.Ref_Tip_Angle = REF_TIP;// + offset_tip.Angle_Deg;
+	rotation.Ref_Root_Angle = REF_ROOT + (con1.Rotation * -360.0);// + offset_root.Angle_Deg;
+	rotation.Ref_Tip_Angle = REF_TIP + (con2.Rotation * -720.0);// + offset_tip.Angle_Deg;
 	rotation.time = time;
 //printf("set_ref_rotation\r\n");
-/*
+
 	xprint(&huart4,"REF_ROOT %d.%d \r\n",gan(rotation.Ref_Root_Angle),dec(rotation.Ref_Root_Angle,100));
 	xprint(&huart4,"REF_TIP  %d.%d \r\n",gan(rotation.Ref_Tip_Angle),dec(rotation.Ref_Tip_Angle,100));
 	xprint(&huart4,"TIME     %d.%d \r\n",gan(rotation.time),dec(rotation.time,100));
-*/
+
 	//xprint(&huart4,"REF_ROOT %d.%d \r\n",gan(REF_ROOT),dec(REF_ROOT,100));
 	//xprint(&huart4,"REF_TIP  %d.%d \r\n",gan(REF_TIP),dec(REF_TIP,100));
 	//xprint(&huart4,"TIME     %d.%d \r\n",gan(time),dec(time,100));

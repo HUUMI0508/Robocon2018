@@ -97,14 +97,12 @@ void ms50(void){
 		xprint(&huart4," %d.%d %d.%d\r\n",gan(rotation.Now_Root_Angle),dec(rotation.Now_Root_Angle,100),gan(rotation.Now_Tip_Angle),dec(rotation.Now_Tip_Angle,100));
 		xprint(&huart4," %d.%d %d.%d\r\n",gan((offset_root.Angle_Deg)),dec((offset_root.Angle_Deg),100),gan((offset_tip.Angle_Deg)),dec((offset_tip.Angle_Deg),100));
 
-#elif 0
+#elif 1
 		printf("data start\n\r");
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((con1.Inref_P)),dec((con1.Inref_P),100),gan((con2.Inref_P)),dec((con2.Inref_P),100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((pRoot.Now_Angle)),dec((pRoot.Now_Angle),100),gan((pTip.Now_Angle)),dec((pTip.Now_Angle),100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan(rotation.Step_Root),dec(rotation.Step_Root,100),gan(rotation.Step_Tip),dec(rotation.Step_Tip,100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan(rotation.Now_Root_Angle),dec(rotation.Now_Root_Angle,100),gan(rotation.Now_Tip_Angle),dec(rotation.Now_Tip_Angle,100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((henc1.qDeg)),dec((henc1.qDeg),100),gan((henc2.qDeg)),dec((henc2.qDeg),100));
-		xprint(&huart4," %d.%d %d.%d\r\n",gan((henc1.qENCCount)),dec((henc1.qENCCount),100),gan((henc2.qENCCount)),dec((henc2.qENCCount),100));
+				xprint(&huart4," %d.%d %d.%d\r\n",gan((con1.Inref_P)),dec((con1.Inref_P),100),gan((con2.Inref_P)),dec((con2.Inref_P),100));
+				xprint(&huart4," %d.%d %d.%d\r\n",gan((henc3.qDeg)),dec((henc3.qDeg),100),gan((henc4.qDeg)),dec((henc4.qDeg),100));
+				xprint(&huart4," %d.%d %d.%d\r\n",gan((henc3.qDeg_m)),dec((henc3.qDeg_m),100),gan((henc4.qDeg_m)),dec((henc4.qDeg_m),100));
+				xprint(&huart4," %d.%d %d.%d\r\n",gan((pRoot.Angle * 360 )),dec((pRoot.Angle * 360),100),gan((pTip.Angle * 360)),dec((pTip.Angle * 360),100));
 
 #endif
 		//xprint(&huart4," %d.%d %d.%d %d.%d\r\n",gan((henc1.qDeg)),dec((henc1.qDeg),100),gan((henc2.qDeg)),dec((henc2.qDeg),100),gan((henc3.qDeg)),dec((henc3.qDeg),100));
@@ -116,7 +114,6 @@ void ms50(void){
 }
 
 void PAISEN_SEQUENCE(){
-//	if(throw_zone == Z3)	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_SET);
 	switch(paisen){
 	case START:
 		break;
@@ -169,10 +166,10 @@ void PAISEN_SEQUENCE(){
 		if(THROW == NACT){
 			if(LAG == NACT){
 				//EDFSetOut(0.0);
-				RELOAD = ACT;//act
-				command.SQUARE = ACT;
+				//RELOAD = ACT;//act
+				//command.SQUARE = ACT;
+				RELOAD = NACT;//act
 				paisen = CATCH_POSITION;
-			//	RELOAD = NACT;//act
 			//	origin = MOVE_ROOT;
 			//	paisen = INIT;
 			}

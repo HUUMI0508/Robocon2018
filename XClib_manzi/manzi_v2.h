@@ -52,7 +52,7 @@
 #define ROOT_GOLDEN_DEG		-180.//deg
 #define TIP_GOLDEN_DEG		-360.//deg
 
-#define ROOT_Z1_SPEED	-440//-395.//-390.//-400.//ok
+#define ROOT_Z1_SPEED	-100//-440//-395.//-390.//-400.//ok
 #define ROOT_Z1_DEG		-180.
 #define TIP_Z1_DEG	-360.
 
